@@ -14,8 +14,19 @@ func SetMessageSender(ms core.MessageSender) {
 }
 
 func StartResponseConsumer() {
-	msgs, err := Channel.Consume("to_wabot_api", "", true, false, false, false, nil)
+	_, err := Channel.QueueDeclare(
+		"to_wabot_api",
+		true,
+		false,
+		false,
+		false,
+		nil,
+	)
+	if err != nil {
+		log.Fatalf("Failed to declare queue: %s", err)
+	}
 
+	msgs, err := Channel.Consume("to_wabot_api", "", true, false, false, false, nil)
 	if err != nil {
 		log.Fatalf("Failed to register a consumer: %s", err)
 	}
@@ -28,7 +39,6 @@ func StartResponseConsumer() {
 			}
 
 			if err := json.Unmarshal(d.Body, &payload); err != nil {
-				log.Printf("Failed to unmarshal JSON: %s", err)
 				continue
 			}
 

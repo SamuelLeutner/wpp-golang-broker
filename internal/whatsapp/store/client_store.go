@@ -12,21 +12,20 @@ var client *whatsmeow.Client
 
 func GetClient() *whatsmeow.Client {
 	if client == nil {
-		return client
-	}
+		dbLog := waLog.Stdout("Database", "ERROR", false)
+		container, err := sqlstore.New("sqlite3", "file:database.db?_foreign_keys=on", dbLog)
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	dbLog := waLog.Stdout("Database", "ERROR", false)
-	container, err := sqlstore.New("sqlite3", "file:database.db?_foreign_keys=on", dbLog)
-	if err != nil {
-		log.Fatal(err)
-	}
+		deviceStore, err := container.GetFirstDevice()
+		if err != nil {
+			log.Fatal(err)
+		}
 
-	deviceStore, err := container.GetFirstDevice()
-	if err != nil {
-		log.Fatal(err)
+		clientLog := waLog.Stdout("Client", "ERROR", false)
+		client = whatsmeow.NewClient(deviceStore, clientLog)
 	}
-	clientLog := waLog.Stdout("Client", "ERROR", false)
-	client = whatsmeow.NewClient(deviceStore, clientLog)
 
 	return client
 }

@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"log"
+	"os"
 
 	"github.com/SamuelLeutner/wpp-golang-broaker/internal/amqp"
 	"github.com/SamuelLeutner/wpp-golang-broaker/internal/whatsapp"
@@ -14,7 +16,9 @@ func main() {
 	app := fiber.New()
 	router.SetupRoutes(app)
 
-	conn, err := amqplib.Dial("amqp://admin:admin@localhost:5672/")
+	user, password := os.Getenv("RABBITMQ_USER"), os.Getenv("RABBITMQ_PASSWORD")
+	url := fmt.Sprintf("amqp://%s:%s@localhost:5672", user, password)
+	conn, err := amqplib.Dial(url)
 	if err != nil {
 		log.Fatal("Erro ao conectar ao RabbitMQ:", err)
 	}
