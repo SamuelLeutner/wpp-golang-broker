@@ -16,6 +16,7 @@ func main() {
 	app := fiber.New()
 	router.SetupRoutes(app)
 
+
 	user, password := os.Getenv("RABBITMQ_USER"), os.Getenv("RABBITMQ_PASSWORD")
 	url := fmt.Sprintf("amqp://%s:%s@localhost:5672", user, password)
 	conn, err := amqplib.Dial(url)
