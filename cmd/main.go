@@ -17,7 +17,13 @@ func main() {
 	router.SetupRoutes(app)
 
 	user, password := os.Getenv("RABBITMQ_USER"), os.Getenv("RABBITMQ_PASSWORD")
-	url := fmt.Sprintf("amqp://%s:%s@localhost:5672", user, password)
+	host, port := os.Getenv("RABBITMQ_HOST"), os.Getenv("RABBITMQ_PORT")
+
+	if user == "" || password == "" || host == "" || port == "" {
+		log.Fatal("Variáveis de ambiente RABBITMQ_USER, RABBITMQ_PASSWORD, RABBITMQ_HOST e RABBITMQ_PORT devem ser definidas")
+	}
+
+	url := fmt.Sprintf("amqp://%s:%s@%s:%s", user, password, host, port)
 	conn, err := amqplib.Dial(url)
 	if err != nil {
 		log.Fatal("Erro ao conectar ao RabbitMQ:", err)
