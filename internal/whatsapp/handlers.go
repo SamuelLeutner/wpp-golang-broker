@@ -10,14 +10,22 @@ import (
 func HandleWhatsAppEvent(evt interface{}) {
 	switch v := evt.(type) {
 	case *events.Message:
-		msg := v.Message.GetConversation()
-		sender := v.Info.Sender.User
+		if !v.Info.IsGroup {
+			msg := ""
+			if v.Message.GetConversation() != "" {
+				msg = v.Message.GetConversation()
+			} else if v.Message.GetExtendedTextMessage() != nil {
+				msg = v.Message.GetExtendedTextMessage().GetText()
+			}
 
-		log.Printf("Nova mensagem de %s: %s", sender, msg)
+			sender := v.Info.Sender.User
 
-		err := amqp.PublishIncomingMessage(sender, msg)
-		if err != nil {
-			log.Println("Erro ao publicar no RabbitMQ:", err)
+			log.Printf("Nova mensagem de %s: %s", sender, msg)
+
+			err := amqp.PublishIncomingMessage(sender, msg)
+			if err != nil {
+				log.Println("Erro ao publicar no RabbitMQ:", err)
+			}
 		}
 	}
 }

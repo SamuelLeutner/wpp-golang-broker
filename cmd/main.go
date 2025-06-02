@@ -9,10 +9,16 @@ import (
 	"github.com/SamuelLeutner/wpp-golang-broaker/internal/whatsapp"
 	"github.com/SamuelLeutner/wpp-golang-broaker/router"
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	amqplib "github.com/rabbitmq/amqp091-go"
 )
 
 func main() {
+  err := godotenv.Load()
+  if err != nil {
+    log.Fatal("Aviso: Erro ao carregar arquivo .env:", err)
+  }
+
 	app := fiber.New()
 	router.SetupRoutes(app)
 
@@ -24,6 +30,7 @@ func main() {
 	}
 
 	url := fmt.Sprintf("amqp://%s:%s@%s:%s", user, password, host, port)
+	log.Println("Conectando ao RabbitMQ em:", url)
 	conn, err := amqplib.Dial(url)
 	if err != nil {
 		log.Fatal("Erro ao conectar ao RabbitMQ:", err)
@@ -46,6 +53,6 @@ func main() {
 		log.Fatal("Erro ao iniciar WhatsApp:", err)
 	}
 
-	log.Fatal(app.Listen(":3000"))
-	select {}
+	httpPort := os.Getenv("HTTP_PORT")
+	log.Fatal(app.Listen(":" + httpPort))
 }
